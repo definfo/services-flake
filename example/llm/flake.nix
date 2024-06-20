@@ -36,7 +36,7 @@
             # models manually in the UI.
             #
             # Search for the models here: https://ollama.com/library
-            models = [ "deepseek-coder-v2" ];
+            models = [ "deepseek-coder-v2" "qwen2" "llama3" ];
           };
 
           # Get ChatGPT like UI, but open-source, with Open WebUI
