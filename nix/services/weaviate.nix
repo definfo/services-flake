@@ -8,15 +8,7 @@ let
 in
 {
   options = {
-    enable = lib.mkEnableOption name;
-
     package = lib.mkPackageOption pkgs "weaviate" { };
-
-    dataDir = lib.mkOption {
-      type = types.str;
-      default = "./data/${name}";
-      description = "Path to the Weaviate data store";
-    };
 
     host = lib.mkOption {
       type = types.str;
@@ -54,12 +46,11 @@ in
       '';
       apply = lib.mapAttrs (_: value: toStr (asAtom value));
     };
+  };
 
-    outputs.settings = lib.mkOption {
-      type = types.deferredModule;
-      internal = true;
-      readOnly = true;
-      default = {
+  config = {
+    outputs = {
+      settings = {
         processes = {
           "${name}" =
             let
@@ -87,7 +78,6 @@ in
                 success_threshold = 1;
                 failure_threshold = 5;
               };
-              namespace = name;
 
               # https://github.com/F1bonacc1/process-compose#-auto-restart-if-not-healthy
               availability.restart = "on_failure";

@@ -4,14 +4,10 @@ let
   inherit (lib) types;
   ollamaPackage = pkgs.ollama.override {
     inherit (config) acceleration;
-    linuxPackages = config.boot.kernelPackages // {
-      nvidia_x11 = config.hardware.nvidia.package;
-    };
   };
 in
 {
   options = {
-    enable = lib.mkEnableOption "Enable the Ollama service";
     package = lib.mkOption {
       type = types.package;
       default = ollamaPackage;
@@ -28,14 +24,7 @@ in
       example = "0.0.0.0";
       description = "The host on which the Ollama service's REST API will listen";
     };
-    dataDir = lib.mkOption {
-      type = types.str;
-      default = "./data/${name}";
-      description = ''
-        The directory containing the Ollama models.
-        Sets the `OLLAMA_MODELS` environment variable.
-      '';
-    };
+
     keepAlive = lib.mkOption {
       type = types.str;
       default = "5m";
@@ -81,12 +70,11 @@ in
         Extra environment variables passed to the `ollama-server` process.
       '';
     };
+  };
 
-    outputs.settings = lib.mkOption {
-      type = types.deferredModule;
-      internal = true;
-      readOnly = true;
-      default = {
+  config = {
+    outputs = {
+      settings = {
         processes = {
           "${name}" =
             let
@@ -122,7 +110,6 @@ in
                 success_threshold = 1;
                 failure_threshold = 5;
               };
-              namespace = name;
               availability.restart = "on_failure";
             };
 
@@ -140,7 +127,6 @@ in
                 done
               '';
             };
-            namespace = name;
             depends_on."${name}".condition = "process_healthy";
           };
         };

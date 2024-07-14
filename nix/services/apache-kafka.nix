@@ -20,18 +20,10 @@ in
 with lib;
 {
   options = {
-    enable = mkEnableOption (lib.mdDoc "Apache Kafka event streaming broker");
-
     port = mkOption {
       description = lib.mdDoc "Port number the broker should listen on.";
       default = 9092;
       type = types.port;
-    };
-
-    dataDir = lib.mkOption {
-      type = types.str;
-      default = "./data/${name}";
-      description = lib.mdDoc "The apache-kafka data directory";
     };
 
     settings = mkOption {
@@ -152,12 +144,10 @@ with lib;
       defaultText = literalExpression "pkgs.apacheKafka.passthru.jre";
       type = types.package;
     };
-
-    outputs.settings = lib.mkOption {
-      type = types.deferredModule;
-      internal = true;
-      readOnly = true;
-      default = {
+  };
+  config = {
+    outputs = {
+      settings = {
         processes = {
           "${name}" =
             let
@@ -186,7 +176,6 @@ with lib;
                 success_threshold = 1;
                 failure_threshold = 5;
               };
-              namespace = name;
 
               availability.restart = "on_failure";
             };

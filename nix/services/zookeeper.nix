@@ -4,20 +4,10 @@
 with lib;
 {
   options = {
-    enable = mkEnableOption (lib.mdDoc "Zookeeper");
-
     port = mkOption {
       description = lib.mdDoc "Zookeeper Client port.";
       default = 2181;
       type = types.port;
-    };
-
-    dataDir = mkOption {
-      type = types.str;
-      default = "./data/${name}";
-      description = lib.mdDoc ''
-        Data directory for Zookeeper
-      '';
     };
 
     id = mkOption {
@@ -97,11 +87,11 @@ with lib;
       example = literalExpression "pkgs.jre";
       type = types.package;
     };
-    outputs.settings = lib.mkOption {
-      type = types.deferredModule;
-      internal = true;
-      readOnly = true;
-      default = {
+  };
+
+  config = {
+    outputs = {
+      settings = {
         processes = {
           "${name}" =
             let
@@ -148,7 +138,6 @@ with lib;
                 success_threshold = 1;
                 failure_threshold = 5;
               };
-              namespace = name;
 
               availability.restart = "on_failure";
             };

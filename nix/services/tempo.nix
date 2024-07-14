@@ -8,8 +8,6 @@ in
     description = ''
       Configure tempo.
     '';
-    enable = lib.mkEnableOption name;
-
     package = lib.mkPackageOption pkgs "tempo" { };
 
     httpAddress = lib.mkOption {
@@ -22,12 +20,6 @@ in
       type = types.int;
       description = "Which port to run tempo on.";
       default = 3200;
-    };
-
-    dataDir = lib.mkOption {
-      type = types.str;
-      default = "./data/${name}";
-      description = "The tempo data directory";
     };
 
     extraConfig = lib.mkOption {
@@ -51,12 +43,11 @@ in
         Additional flags to pass to tempo.
       '';
     };
+  };
 
-    outputs.settings = lib.mkOption {
-      type = types.deferredModule;
-      internal = true;
-      readOnly = true;
-      default = {
+  config = {
+    outputs = {
+      settings = {
         processes."${name}" =
           let
             tempoConfig = lib.recursiveUpdate
@@ -126,7 +117,6 @@ in
               success_threshold = 1;
               failure_threshold = 5;
             };
-            namespace = name;
             availability.restart = "on_failure";
           };
       };

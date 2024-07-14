@@ -25,8 +25,6 @@ let
 in
 {
   options = {
-    enable = lib.mkEnableOption name;
-
     package = lib.mkPackageOption pkgs "pgadmin4" { };
 
     host = lib.mkOption {
@@ -58,12 +56,6 @@ in
       default = 6;
     };
 
-    dataDir = lib.mkOption {
-      type = types.str;
-      default = "./data/${name}";
-      description = "The pgadmin4 data directory";
-    };
-
     extraDefaultConfig = lib.mkOption {
       type = pyType;
       internal = true;
@@ -85,12 +77,11 @@ in
       default = { };
       description = "Additional config for pgadmin4";
     };
+  };
 
-    outputs.settings = lib.mkOption {
-      type = types.deferredModule;
-      internal = true;
-      readOnly = true;
-      default = {
+  config = {
+    outputs = {
+      settings = {
         processes =
           let
             pgadminConfig = pkgs.writeTextDir "config_local.py" (
@@ -129,7 +120,6 @@ in
               in
               {
                 command = setupScript;
-                namespace = name;
               };
 
             "${name}" =
@@ -167,7 +157,6 @@ in
                   success_threshold = 1;
                   failure_threshold = 5;
                 };
-                namespace = name;
                 depends_on."${name}-init".condition = "process_completed_successfully";
                 # https://github.com/F1bonacc1/process-compose#-auto-restart-if-not-healthy
                 availability.restart = "on_failure";

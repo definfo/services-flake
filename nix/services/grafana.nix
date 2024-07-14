@@ -9,8 +9,6 @@ in
     description = ''
       Configure grafana.
     '';
-    enable = lib.mkEnableOption name;
-
     package = lib.mkPackageOption pkgs "grafana" { };
 
     http_port = lib.mkOption {
@@ -29,12 +27,6 @@ in
       type = types.str;
       description = "Protocol (http, https, h2, socket).";
       default = "http";
-    };
-
-    dataDir = lib.mkOption {
-      type = types.str;
-      description = "Directory where grafana stores its logs and data.";
-      default = "./data/${name}";
     };
 
     extraConf = lib.mkOption {
@@ -100,12 +92,11 @@ in
         ]
       '';
     };
+  };
 
-    outputs.settings = lib.mkOption {
-      type = types.deferredModule;
-      internal = true;
-      readOnly = true;
-      default = {
+  config = {
+    outputs = {
+      settings = {
         processes."${name}" =
           let
             grafanaConfig = lib.recursiveUpdate
@@ -168,7 +159,6 @@ in
               success_threshold = 1;
               failure_threshold = 5;
             };
-            namespace = name;
 
             # https://github.com/F1bonacc1/process-compose#-auto-restart-if-not-healthy
             availability.restart = "on_failure";

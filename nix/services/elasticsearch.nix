@@ -17,15 +17,7 @@ in
           };
       } 
     '';
-    enable = lib.mkEnableOption name;
-
     package = lib.mkPackageOption pkgs "elasticsearch7" { };
-
-    dataDir = lib.mkOption {
-      type = types.str;
-      default = "./data/${name}";
-      description = "Directory where elasticsearch stores its data.";
-    };
 
     listenAddress = lib.mkOption {
       description = "Elasticsearch listen address.";
@@ -105,12 +97,11 @@ in
       example =
         lib.literalExpression "[ pkgs.elasticsearchPlugins.discovery-ec2 ]";
     };
+  };
 
-    outputs.settings = lib.mkOption {
-      type = types.deferredModule;
-      internal = true;
-      readOnly = true;
-      default = {
+  config = {
+    outputs = {
+      settings = {
         processes."${name}" =
           let
             es7 = builtins.compareVersions config.package.version "7" >= 0;
@@ -197,7 +188,6 @@ in
               success_threshold = 1;
               failure_threshold = 5;
             };
-            namespace = name;
 
             # https://github.com/F1bonacc1/process-compose#-auto-restart-if-not-healthy
             availability.restart = "on_failure";

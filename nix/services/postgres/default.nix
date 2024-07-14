@@ -5,8 +5,6 @@ with lib.types; let
 in
 {
   options = {
-    enable = lib.mkEnableOption name;
-
     package = lib.mkOption {
       type = types.package;
       description = "Which package of postgresql to use";
@@ -42,12 +40,6 @@ in
 
         ${lib.concatLines (builtins.map (x: "- " + x) (builtins.attrNames pkgs.postgresql.pkgs))}
       '';
-    };
-
-    dataDir = lib.mkOption {
-      type = lib.types.str;
-      default = "./data/${name}";
-      description = "The DB data directory";
     };
 
     socketDir = lib.mkOption {
@@ -231,6 +223,8 @@ in
             description = ''
               The initial list of schemas for the database; if null (the default),
               an empty database is created.
+
+              If path is a directory, use `*.sql` files in name order.
             '';
           };
         };
@@ -287,11 +281,10 @@ in
         SQL expressions separated by a semi-colon.
       '';
     };
-    outputs.settings = lib.mkOption {
-      type = types.deferredModule;
-      internal = true;
-      readOnly = true;
-      default =
+  };
+  config = {
+    outputs = {
+      settings =
         {
           processes = {
             # DB initialization
@@ -301,7 +294,6 @@ in
               in
               {
                 command = setupScript;
-                namespace = name;
               };
 
             # DB process
@@ -340,7 +332,6 @@ in
                   success_threshold = 1;
                   failure_threshold = 5;
                 };
-                namespace = name;
                 depends_on."${name}-init".condition = "process_completed_successfully";
                 # https://github.com/F1bonacc1/process-compose#-auto-restart-if-not-healthy
                 availability.restart = "on_failure";

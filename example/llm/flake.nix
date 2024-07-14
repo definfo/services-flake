@@ -31,12 +31,12 @@
             dataDir = "${dataDirBase}/ollama1";
 
             # Define the models to download when our app starts
-            # 
+            #
             # You can also initialize this to empty list, and download the
             # models manually in the UI.
             #
             # Search for the models here: https://ollama.com/library
-            models = [ "deepseek-coder-v2" "qwen2" "llama3" ];
+            models = [ "deepseek-coder-v2" "qwen2" "phi3" ];
           };
 
           # Get ChatGPT like UI, but open-source, with Open WebUI

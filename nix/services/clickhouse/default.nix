@@ -6,8 +6,6 @@ let
 in
 {
   options = {
-    enable = lib.mkEnableOption name;
-
     package = lib.mkOption {
       type = types.package;
       description = "Which package of clickhouse to use";
@@ -19,12 +17,6 @@ in
       type = types.int;
       description = "Which port to run clickhouse on. This port is for `clickhouse-client` program";
       default = 9000;
-    };
-
-    dataDir = lib.mkOption {
-      type = types.str;
-      default = "./data/${name}";
-      description = "The clickhouse data directory";
     };
 
     defaultExtraConfig = lib.mkOption {
@@ -89,11 +81,10 @@ in
         ]
       '';
     };
-    outputs.settings = lib.mkOption {
-      type = types.deferredModule;
-      internal = true;
-      readOnly = true;
-      default = {
+  };
+  config = {
+    outputs = {
+      settings = {
         processes =
           let
             clickhouseConfig = yamlFormat.generate "clickhouse-config.yaml" (
@@ -139,7 +130,6 @@ in
               in
               {
                 command = setupScript;
-                namespace = name;
               };
 
             # DB process
@@ -170,7 +160,6 @@ in
                   success_threshold = 1;
                   failure_threshold = 5;
                 };
-                namespace = name;
                 depends_on."${name}-init".condition = "process_completed_successfully";
                 # https://github.com/F1bonacc1/process-compose#-auto-restart-if-not-healthy
                 availability.restart = "on_failure";

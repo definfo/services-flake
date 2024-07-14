@@ -19,9 +19,30 @@
 
 By default Ollama uses the CPU for inference. To enable GPU acceleration:
 
+> [!note]
+> NixOS provides documentation for configuring both [Nvidia](https://nixos.wiki/wiki/Nvidia) and [AMD GPUs](https://nixos.wiki/wiki/AMD_GPU) drivers. However, if you are using any other distribution, refer to their respective documentation.
+
 ### CUDA
 
 For NVIDIA GPUs.
+
+Firstly, allow unfree packages:
+
+```nix
+# Inside perSystem = { system, ... }: { ...
+{
+  imports = [
+    "${inputs.nixpkgs}/nixos/modules/misc/nixpkgs.nix"
+  ];
+  nixpkgs = {
+    hostPlatform = system;
+    # Required for CUDA
+    config.allowUnfree = true;
+  };
+}
+```
+
+And then enable CUDA acceleration:
 
 ```nix
 # In `perSystem.process-compose.<name>`

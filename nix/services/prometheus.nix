@@ -5,8 +5,6 @@ let
 in
 {
   options = {
-    enable = lib.mkEnableOption name;
-
     package = lib.mkPackageOption pkgs "prometheus" { };
 
     port = lib.mkOption {
@@ -19,12 +17,6 @@ in
       type = types.str;
       default = "0.0.0.0";
       description = lib.mdDoc "Address to listen on for the web interface, API, and telemetry";
-    };
-
-    dataDir = lib.mkOption {
-      type = types.str;
-      default = "./data/${name}";
-      description = "The prometheus data directory";
     };
 
     extraFlags = lib.mkOption {
@@ -59,12 +51,11 @@ in
         }];
       '';
     };
+  };
 
-    outputs.settings = lib.mkOption {
-      type = types.deferredModule;
-      internal = true;
-      readOnly = true;
-      default = {
+  config = {
+    outputs = {
+      settings = {
         processes = {
           "${name}" =
             let
@@ -97,7 +88,6 @@ in
                 success_threshold = 1;
                 failure_threshold = 5;
               };
-              namespace = name;
 
               # https://github.com/F1bonacc1/process-compose#-auto-restart-if-not-healthy
               availability.restart = "on_failure";

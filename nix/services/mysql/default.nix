@@ -6,19 +6,11 @@ with lib.types; let
 in
 {
   options = {
-    enable = lib.mkEnableOption "MySQL process and expose utilities";
-
     package = lib.mkOption {
       type = types.package;
       description = "Which package of MySQL to use";
       default = pkgs.mariadb;
       defaultText = lib.literalExpression "pkgs.mariadb";
-    };
-
-    dataDir = lib.mkOption {
-      type = types.str;
-      default = "./data/${name}";
-      description = "The mysql data directory";
     };
 
     socketDir = lib.mkOption {
@@ -163,11 +155,11 @@ in
         ]
       '';
     };
-    outputs.settings = lib.mkOption {
-      type = types.deferredModule;
-      internal = true;
-      readOnly = true;
-      default = {
+  };
+
+  config = {
+    outputs = {
+      settings = {
         processes =
           let
             isMariaDB = lib.getName config.package == lib.getName pkgs.mariadb;
@@ -298,14 +290,12 @@ in
                   success_threshold = 1;
                   failure_threshold = 5;
                 };
-                namespace = name;
 
                 # https://github.com/F1bonacc1/process-compose#-auto-restart-if-not-healthy
                 availability.restart = "on_failure";
               };
             "${name}-configure" = {
               command = configureScript;
-              namespace = name;
               depends_on."${name}".condition = "process_healthy";
             };
           };
